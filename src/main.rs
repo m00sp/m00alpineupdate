@@ -1,15 +1,17 @@
+use std::io::{self, BufRead, BufReader};
+use std::io::Write;
 use notify_rust::Notification;
 use notify_rust::Hint;
 use notify_rust::Urgency::{
-    Low,
-    Normal,
+//    Low,
+//    Normal,
     Critical,
 };
 use std::process::{Command, exit, Stdio};
-use std::process::id;
+//use std::process::id;
 use std::fs::File;
 use std::net::{SocketAddr, TcpStream};
-use std::io::stdout;
+//use std::io::stdout;
 
 pub fn sucesso() -> Result<(), notify_rust::error::Error> {
   Notification::new()
@@ -52,7 +54,7 @@ pub fn umoutrotest() -> Result<(), notify_rust::error::Error> {
                                     });
     Ok(())
 }
-pub fn atualizarrepos() {
+pub fn atualizar_repos() -> anyhow::Result<()> {
     let child = Command::new("sudo")
         .arg("apk")
         .arg("update")
@@ -66,11 +68,19 @@ pub fn atualizarrepos() {
 
     assert!(output.status.success());
     println!("O indice dos repositorios foram atualizados com sucesso");
-    sucesso();
+    sucesso().unwrap();
+
+	Ok(())
+    
 }
 
-pub fn upgrade() {
-    let child = Command::new("sudo")
+pub fn simulação() -> anyhow::Result<()> {
+
+	let caminho = "pacotes.txt";
+
+	let mut arquivo = File::create(caminho)?;
+
+    let pacotes = Command::new("sudo")
         .arg("apk")
         .arg("upgrade")
         .arg("-vvs")
@@ -78,39 +88,34 @@ pub fn upgrade() {
         .spawn()
         .unwrap();
         //.expect("failed to execute child");
-	let linhas = Command::new("wc")
-    	.arg("-l")
-    	.stdin(Stdio::from(child.stdout.unwrap()))
-    	.stdout(Stdio::piped())
-    	.spawn()
-    	.unwrap();
-	/*let apks = Command::new("echo")
-    	.arg("-")
-    	.arg("1")
-    	.stdin(Stdio::from(linhas.stdout.unwrap()))
-    	.stdout(Stdio::piped())
-    	.spawn()
-    	.unwrap();*/
-	//let dif = 1;
 
-    /*let pacotes = Command::new("bc")
-        .stdin(Stdio::from(linhas.stdout.unwrap()))
-        .stdout(Stdio::piped())
-        .spawn()
-        .unwrap();*/
-    let output = linhas
+    let resultado = pacotes
         .wait_with_output()
         .expect("failed to wait on child");
 
-	//let apks = output - dif;
-    //println!(" com sucessoPacotes igual: {}", apks);
-	println!("status: {}", output.status);
-    println!("stdout: {}", String::from_utf8_lossy(&output.stdout));
-    assert!(output.status.success());
-	//let int = output.to_string().
-    //let output = output.parse::<i32>().unwrap();
-    println!("Você tem {:#?} pacotes desatualizados", (&output.stdout));
-    sucesso();
+	arquivo.write_all(&resultado.stdout)?;
+
+    sucesso().unwrap();
+	Ok(())
+}
+
+pub fn contar_linhas() -> io::Result<()> {
+
+    let caminho_arquivo = "pacotes.txt";
+    let input = File::open(caminho_arquivo)?;
+    let buffered = BufReader::new(input);
+    let contar_linhas = buffered.lines().count();
+
+    //let input = File::open(caminho_arquivo)?;
+    //let buffered = BufReader::new(input);
+    //for (nr, _) in buffered.lines().enumerate() {
+      //  println!("ATENÇÃO: você tem  [{}/{}] pacotes desatualizados", nr, contar_linhas -1);
+    //}
+    //for line in buffered.lines() {
+    println!("ATENÇÃO! Você tem {} pacotes desatualizados", contar_linhas -1);
+    //}
+
+    Ok(())
 
 }
 
@@ -119,11 +124,12 @@ fn main() {
     	//SocketAddr::from(([127, 0, 0, 1], 8080)),
     	SocketAddr::from(([213,219,36,190], 80)),
 	];
-	if let Ok(stream) = TcpStream::connect(&addrs[..]) {
+	if let Ok(_) = TcpStream::connect(&addrs[..]) {
     	println!("Connected to the server!");
-    	bemvindo();
-    	atualizarrepos();
-    	upgrade();
+    	bemvindo().unwrap();
+    	atualizar_repos().unwrap();
+    	simulação().unwrap();
+    	contar_linhas().unwrap();
 	} else {
     	println!("Não ha internet :(");
     	exit(1)

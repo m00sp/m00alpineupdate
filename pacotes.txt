@@ -1,0 +1,7 @@
+(1/6) Upgrading qt5-qtwebengine (5.15.16-r8 -> 5.15.16-r9)
+(2/6) Upgrading librados18 (18.2.2-r4 -> 18.2.4-r0)
+(3/6) Upgrading librbd18 (18.2.2-r4 -> 18.2.4-r0)
+(4/6) Upgrading linux-lts (6.6.44-r0 -> 6.6.45-r0)
+(5/6) Upgrading py3-setuptools (69.5.1-r0 -> 70.3.0-r0)
+(6/6) Upgrading py3-setuptools-pyc (69.5.1-r0 -> 70.3.0-r0)
+OK: 1854 packages, 18564 dirs, 307354 files, 13089 MiB

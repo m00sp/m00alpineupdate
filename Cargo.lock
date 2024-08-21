@@ -860,6 +860,7 @@ dependencies = [
 name = "m00alpineupdate"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "notify-rust",
 ]
 
